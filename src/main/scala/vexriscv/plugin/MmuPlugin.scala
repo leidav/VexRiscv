@@ -291,7 +291,7 @@ class MmuPlugin(ioRange : UInt => Bool,
                   line.allowExecute := dBusRsp.pte.X
                   line.allowUser := dBusRsp.pte.U
                   line.superPage := state === State.L1_RSP
-                  line.checkpointEnabled:=dBusRsp.pte.rsp(0)
+                  line.checkpointEnabled:=dBusRsp.pte.RSW(0)
                 }
               }
             }

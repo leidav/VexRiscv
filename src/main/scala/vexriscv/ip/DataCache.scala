@@ -185,6 +185,7 @@ case class DataCacheCpuWriteBack(p : DataCacheConfig) extends Bundle with IMaste
   val keepMemRspData = Bool() //Used by external AMO to avoid having an internal buffer
   val fence = FenceFlags()
   val exclusiveOk = Bool()
+  //val checkpointEnabled = Bool()
 
   override def asMaster(): Unit = {
     out(isValid,isStuck,isUser, address, fence, storeData)
@@ -589,6 +590,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
 
 
   class LineInfo() extends Bundle{
+    val checkpointEnabled = Bool()
     val valid, error = Bool()
     val address = UInt(tagRange.length bit)
   }
@@ -844,6 +846,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
         tagsWriteCmd.address := counter.resized
         tagsWriteCmd.way.setAll()
         tagsWriteCmd.data.valid := False
+        tagsWriteCmd.data.checkpointEnabled:= False
         io.cpu.execute.haltIt := True
         when(!hold) {
           counter := counter + 1
@@ -1076,6 +1079,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
       dataWriteCmd.valid := True
       dataWriteCmd.address := baseAddress(lineRange) @@ counter
       dataWriteCmd.data := io.mem.rsp.data
+      tagsWriteCmd.data.checkpointEnabled := io.cpu.memory.mmuRsp.checkpointEnabled
       dataWriteCmd.mask.setAll()
       dataWriteCmd.way := waysAllocator
       error := error | io.mem.rsp.error
@@ -1094,6 +1098,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
       tagsWriteCmd.data.valid := !(kill || killReg)
       tagsWriteCmd.data.address := baseAddress(tagRange)
       tagsWriteCmd.data.error := error || (io.mem.rsp.valid && io.mem.rsp.error)
+      tagsWriteCmd.data.checkpointEnabled := tagsWriteCmd.data.valid & io.cpu.memory.mmuRsp.checkpointEnabled
       tagsWriteCmd.way := waysAllocator
 
       error := False
@@ -1154,6 +1159,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
           stageB.flusher.hold := True
           tagsWriteCmd.address := input.address(lineRange)
           tagsWriteCmd.data.valid := False
+          tagsWriteCmd.data.checkpointEnabled := False
           tagsWriteCmd.way := wayHits
           loader.done := False //Hold loader tags write
         }
