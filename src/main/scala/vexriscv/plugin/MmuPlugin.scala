@@ -79,6 +79,7 @@ class MmuPlugin(ioRange : UInt => Bool,
       val virtualAddress = Vec(UInt(10 bits), UInt(10 bits))
       val physicalAddress = Vec(UInt(10 bits), UInt(10 bits))
       val allowRead, allowWrite, allowExecute, allowUser = Bool
+      val checkpointEnabled = Bool
 
       def init = {
         valid init (False)
@@ -152,6 +153,7 @@ class MmuPlugin(ioRange : UInt => Bool,
           port.bus.rsp.exception := !dirty &&  cacheHit && (cacheLine.exception || cacheLine.allowUser && privilegeService.isSupervisor() && !csr.status.sum || !cacheLine.allowUser && privilegeService.isUser())
           port.bus.rsp.refilling :=  dirty || !cacheHit
           port.bus.rsp.isPaging := True
+          port.bus.rsp.checkpointEnabled:= cacheLine.checkpointEnabled
         } otherwise {
           port.bus.rsp.physicalAddress := port.bus.cmd.last.virtualAddress
           port.bus.rsp.allowRead := True
@@ -160,6 +162,7 @@ class MmuPlugin(ioRange : UInt => Bool,
           port.bus.rsp.exception := False
           port.bus.rsp.refilling := False
           port.bus.rsp.isPaging := False
+          port.bus.rsp.checkpointEnabled:=False
         }
         port.bus.rsp.isIoAccess := ioRange(port.bus.rsp.physicalAddress)
 
@@ -288,6 +291,7 @@ class MmuPlugin(ioRange : UInt => Bool,
                   line.allowExecute := dBusRsp.pte.X
                   line.allowUser := dBusRsp.pte.U
                   line.superPage := state === State.L1_RSP
+                  line.checkpointEnabled:=dBusRsp.pte.rsp(0)
                 }
               }
             }

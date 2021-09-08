@@ -87,6 +87,7 @@ case class MemoryTranslatorRsp(p : MemoryTranslatorBusParameter) extends Bundle{
   val refilling = Bool
   val bypassTranslation = Bool
   val ways = Vec(MemoryTranslatorRspWay(), p.wayCount)
+  val checkpointEnabled = Bool
 }
 case class MemoryTranslatorRspWay() extends Bundle{
   val sel = Bool()
