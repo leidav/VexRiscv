@@ -162,7 +162,7 @@ class MmuPlugin(ioRange : UInt => Bool,
           port.bus.rsp.exception := False
           port.bus.rsp.refilling := False
           port.bus.rsp.isPaging := False
-          port.bus.rsp.checkpointEnabled:=False
+          port.bus.rsp.checkpointEnabled:= False 
         }
         port.bus.rsp.isIoAccess := ioRange(port.bus.rsp.physicalAddress)
 

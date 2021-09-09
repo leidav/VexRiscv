@@ -1079,7 +1079,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
       dataWriteCmd.valid := True
       dataWriteCmd.address := baseAddress(lineRange) @@ counter
       dataWriteCmd.data := io.mem.rsp.data
-      tagsWriteCmd.data.checkpointEnabled := io.cpu.memory.mmuRsp.checkpointEnabled
+      tagsWriteCmd.data.checkpointEnabled := stageB.mmuRsp.checkpointEnabled
       dataWriteCmd.mask.setAll()
       dataWriteCmd.way := waysAllocator
       error := error | io.mem.rsp.error
@@ -1098,7 +1098,7 @@ class DataCache(val p : DataCacheConfig, mmuParameter : MemoryTranslatorBusParam
       tagsWriteCmd.data.valid := !(kill || killReg)
       tagsWriteCmd.data.address := baseAddress(tagRange)
       tagsWriteCmd.data.error := error || (io.mem.rsp.valid && io.mem.rsp.error)
-      tagsWriteCmd.data.checkpointEnabled := tagsWriteCmd.data.valid & io.cpu.memory.mmuRsp.checkpointEnabled
+      tagsWriteCmd.data.checkpointEnabled := tagsWriteCmd.data.valid & stageB.mmuRsp.checkpointEnabled
       tagsWriteCmd.way := waysAllocator
 
       error := False
