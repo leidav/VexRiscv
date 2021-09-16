@@ -53,9 +53,11 @@ class MemoryTranslatorPlugin(tlbSize : Int,
       val virtualAddress = UInt(20 bits)
       val physicalAddress = UInt(20 bits)
       val allowRead, allowWrite, allowExecute, allowUser = Bool
+      val checkpointEnabled = Bool()
 
       def init = {
         valid init (False)
+        checkpointEnabled init (False)
         this
       }
     }
@@ -107,11 +109,13 @@ class MemoryTranslatorPlugin(tlbSize : Int,
         }
 
 
+        port.bus.rsp.checkpointEnabled:= False 
         when(isInMmuRange) {
           port.bus.rsp.physicalAddress := cacheLine.physicalAddress @@ port.bus.cmd.last.virtualAddress(11 downto 0)
           port.bus.rsp.allowRead := cacheLine.allowRead
           port.bus.rsp.allowWrite := cacheLine.allowWrite
           port.bus.rsp.allowExecute := cacheLine.allowExecute
+          port.bus.rsp.checkpointEnabled:= cacheLine.checkpointEnabled
           ???
 //          port.bus.rsp.hit := cacheHit
 //          port.stage.arbitration.haltItself setWhen (port.bus.cmd.isValid && !cacheHit && !sharedMiss)

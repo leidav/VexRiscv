@@ -145,6 +145,7 @@ class MmuPlugin(ioRange : UInt => Bool,
         val entryToReplace = Counter(port.args.portTlbSize)
 
 
+        port.bus.rsp.checkpointEnabled:= False 
         when(requireMmuLockup) {
           port.bus.rsp.physicalAddress := cacheLine.physicalAddress(1) @@ (cacheLine.superPage ? port.bus.cmd.last.virtualAddress(21 downto 12) | cacheLine.physicalAddress(0)) @@ port.bus.cmd.last.virtualAddress(11 downto 0)
           port.bus.rsp.allowRead := cacheLine.allowRead  || csr.status.mxr && cacheLine.allowExecute
@@ -162,7 +163,7 @@ class MmuPlugin(ioRange : UInt => Bool,
           port.bus.rsp.exception := False
           port.bus.rsp.refilling := False
           port.bus.rsp.isPaging := False
-          port.bus.rsp.checkpointEnabled:= False 
+          //port.bus.rsp.checkpointEnabled:= False 
         }
         port.bus.rsp.isIoAccess := ioRange(port.bus.rsp.physicalAddress)
 
